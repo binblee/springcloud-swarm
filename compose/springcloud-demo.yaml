@@ -1,0 +1,24 @@
+version: '3'
+services:
+  eureka:
+    image: binblee/demo-eurekaserver
+    ports:
+      - "8761:8761"
+    labels:
+      - "aliyun.logs.eureka=stdout"
+
+  web:
+    image: binblee/demo-web
+    environment:
+      - EUREKA_SERVER_ADDRESS=eureka
+    ports:
+      - "8080"
+    labels:
+      - "aliyun.logs.web=stdout"
+
+  bookservice:
+    image: binblee/demo-bookservice
+    environment:
+      - EUREKA_SERVER_ADDRESS=eureka
+    labels:
+      - "aliyun.logs.bookservice=stdout"
