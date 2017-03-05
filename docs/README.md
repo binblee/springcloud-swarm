@@ -11,8 +11,7 @@ Docker Swarm Mode集群和传统的Swarm集群最大的差异是利用引擎内�
 ![](images/springcloud-tiny.png)
 
 
-
-```Web```应用在访问时会调用```BookService```，宣布两个服务都正常。
+Web应用在访问时会调用BookService，宣布两个服务都正常。
 
 
 ```
