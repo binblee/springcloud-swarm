@@ -12,7 +12,8 @@ Docker Swarm Mode集群和传统的Swarm集群最大的差异是利用引擎内�
 
 
 
-```Web```应用在访问时会调用```BookService```，宣布两个服务都正常：
+```Web```应用在访问时会调用```BookService```，宣布两个服务都正常。
+
 
 ```
 $ curl http://web:8080/
@@ -20,9 +21,7 @@ Web+BOOK Service Available.
 ```
 
 
-
 Web对BookService服务调用参见ApplicationController.java代码。
-
 
 
 ```java
