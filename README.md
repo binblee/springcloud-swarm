@@ -2,6 +2,16 @@
 
 
 
+# Spring Cloud application
+
+Demo application is a tiny Spring Cloud application which has three services. ```Web``` and ```BookService```will register itself to ```Eureka``` Service during boot. ```Web``` service depends on ```BookService```, when it is invoked, it will find available instances of ```BookService``` from ```Eureka``` Server and get input. 
+
+
+
+![](images/springcloud-tiny.png)
+
+
+
 ## Build
 
 
