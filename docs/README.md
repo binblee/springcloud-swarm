@@ -1,138 +1,46 @@
-# Docker Swarm运行Spring Cloud应用
-
-Docker Swarm Mode集群和传统的Swarm集群最大的差异是利用引擎内置的集群管理能力，取消了对KVStore依赖，简化了Docker集群的创建和管理。随着Docker商业化产品的步伐加快，其Docker Datacenter也已经支持了Swarm Mode。今天，我们就和大家一起看一下如何利用这些最新特性在Swarm Mode集群中部署一个Spring Cloud应用。本文的示例代码见
+# Spring Cloud Demo on Docker
 
 
 
-## 极简版Spring Cloud应用
+# Spring Cloud application
 
-云应用（Cloud Native Application）的一个重要特点是动态。运行在云上的应用，其实例可能随时生灭，随着负载的变化，数目也会增减。为适应这个变化，应用需要借助于服务发现来相互定位。开源的微服务框架Spring Cloud中封装了Netflix的服务发现Eureka，一个极简的Spring Cloud应用可以是如下结构：
+Demo application is a tiny Spring Cloud application which has three services. ```Web``` and ```BookService```will register itself to ```Eureka``` Service during boot. ```Web``` service depends on ```BookService```, when it is invoked, it will find available instances of ```BookService``` from ```Eureka``` Server. ```Web``` will call ```BookService``` REST API to fulfill its result. 
+
+
 
 ![](images/springcloud-tiny.png)
 
 
-Web应用在访问时会调用BookService，宣布两个服务都正常。
 
+## Build
+
+
+
+Run this command to build all images, it will rebuild all images even if no code change.
 
 ```
-$ curl http://web:8080/
-Web+BOOK Service Available.
-```
-
-
-Web对BookService服务调用参见ApplicationController.java代码。
-
-
-```java
-    @RequestMapping("/")
-    public String getIndex(){
-        String message = restTemplate.getForObject("http://bookservice/",String.class);
-        return "Web+" + message;
-    }
+./build-all.sh
 ```
 
 
 
-可以看到restTemplate访问```"http://bookservice/"```，从```Eureka```服务中检索到名为```bookservice```服务的所有实例地址和端口号，利用客户端负载机制选择其中一个实例进行访问。
+## Run application in local environment
 
 
 
-```BookService```服务在启动的时候会自动向```Eureka```注册。Eureka Server的地址配置在```application.properties```文件中：
-
-```
-server.port=0
-eureka.client.serviceUrl.defaultZone=http://${EUREKA_SERVER_ADDRESS}:8761/eureka/
-```
-
-
-
-在```bootstrap.properties```文件中声明服务名：
+Run demo application in local environment is wasy, there is an all-in-one compose file which allows you to run all the services. 
 
 ```
-spring.application.name=bookservice
+cd compose
+docker-compose -f all-in-one.yml up -d
 ```
 
 
 
-如果大家查看```Web```服务的相应文件，也会看到类似的配置，只不过声明自己的服务名不同。
-
-
-
-Spring Cloud对Eureka Server和Eureka Client做了很好的封装，一个应用只需通过如下标注即可成为Eureka Server：
-
-```java
-@SpringBootApplication
-@EnableEurekaServer
-public class EurekaApplication {
-   ...
-}
-```
-
-
-
-Eureka Client的声明如下：
-
-```java
-@SpringBootApplication
-@EnableDiscoveryClient
-public class BookserviceApplication {
-   ...
-}
-```
-
-
-
-## 构建镜像
-
-构建镜像分两个步骤，Gradle编译生成Spring Boot JAR；然后利用Dockerfile创建Docker镜像。
+Find which port mapping for each services.
 
 ```
-$ ./gradlew build
-$ docker build -t <镜像名>:<标签> .
-```
-
-
-
-示例Dockerfile是针对Gradle编译出来的目录结构的。如果使用Maven编译，请更改JAR目录位置。
-
-```
-FROM java:8-jre-alpine
-VOLUME /tmp
-ADD build/libs/*.jar app.jar
-RUN sh -c 'touch /app.jar'
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
-```
-
-
-
-全部构建完成后查看新生成的Docker镜像：
-
-```
-$ docker image ls
-REPOSITORY         TAG         IMAGE ID       CREATED      SIZE
-demo-web           latest      281e25e4c72c   2 days ago   180 MB
-demo-bookservice   latest      249a93dfe3c6   2 days ago   180 MB
-demo-eurekaserver  latest      2cfeb50cf373   2 days ago   204 MB
-```
-
-
-
-
-## 在本地运行
-
-在compose目录下有一个V3版本的部署描述文件```springcloud-demo.yml```。如果你的计算机上有docker-compose，可以运行如下命令启动全部服务：
-
-```
-$ cd compose
-$ docker-compose -f springcloud-demo.yml up -d
-```
-
-
-
-找到Eureka和Web的所对应的端口。
-
-```
-$ docker-compose -f springcloud-demo.yaml ps
+$ docker-compose -f all-in-one.yaml ps
         Name                       Command               State            Ports
 ----------------------------------------------------------------------------------------
 compose_bookservice_1   java -Djava.security.egd=f ...   Up
@@ -142,67 +50,174 @@ compose_web_1           java -Djava.security.egd=f ...   Up      0.0.0.0:32771->
 
 
 
-访问```Eureka Server```：
+You will see eureka maps to port 8761 of localhost while web maps to 32771 in this case.
+
+
+
+## Access Eureka Server
+
+
+
+Access Eureka server through port 8761. You will see this Eureka server has one replica and two services registered. 
+
+```
+http://localhost:8761
+```
 
 ![](images/eureka-screenshot.png)
 
-从上面的输出可以看到Web和BookService服务各有一个实例注册上了。下面访问```Web```服务：
+## Access the demo application
+
+Docker allocated an random port for ```web``` service, you can get the port number using ```docker-compose ps``` command, or you can assign a port number in ```all-in-one.yml```.
+
+Run this command or access it using a web browser.
+
+```
+curl http://localhost:<port>
+```
 
 ![](images/web-screenshot.png)
 
+## Deploy to docker swarm using compose V3 template
 
+Let's take a look at [compose/all-in-one.yml](compose/all-in-one.yml). There are no version 3 specific compose syntax, you can deploy the application by using docker-compose in local environment, or deploy it to a Docker swarm cluster directly. 
 
-## 部署到Swarm Mode集群
-
-Docker 1.12开始Swarm Mode集群模式，相关的文章可以参考云栖文章。读者登录到任意Swarm管理节点，执行部署命令。
-
-```
-docker stack deploy -f springcloud-demo.yml springcloud-demo
-```
-
-
-
-示例springcloud-demo.yml采用Compose V3格式，新格式和V2的差别讨论间云栖文章。我们在这里没有使用V3特有的内容，贴在这里供大家参考：
-
-```
+```yaml
 version: '3'
 services:
   eureka:
-    image: XXX/demo-eurekaserver
+    image: binblee/demo-eurekaserver
     ports:
       - "8761:8761"
+    ...
+
   web:
-    image: XXX/demo-web
+    image: binblee/demo-web
     environment:
       - EUREKA_SERVER_ADDRESS=eureka
     ports:
       - "8080"
+    ...
+
   bookservice:
-    image: XXX/demo-bookservice
+    image: binblee/demo-bookservice
     environment:
       - EUREKA_SERVER_ADDRESS=eureka
+    ...
 ```
 
 
 
-## 部署到Docker Datacenter
-
-Docker公司的商业版集群管理软件Docker Datacenter支持了Swarm Mode模式集群。云栖上有一篇文章可以参考在阿里云上一键部署。
-
-
-
-最新的Docker Datacenter 2.1上用户可以通过界面上的Compose编辑器输入Compose模版完成部署，效果和上面用```docker stack```命令一样。
-
-
-
-在2.0版上没有Compose模版编辑界面，读者可以登录进入任何一个管理节点，通过命令行执行同样命令部署：
+You can deploy it to a docker swarm cluster like this:
 
 ```
-docker stack deploy -f springcloud-demo.yml springcloud-demo
+docker stack deploy -f all-in-one.yml springcloud-demo
 ```
 
 
 
-## 小结
+## Run in production environment
 
-本文讨论了如何在Docker Swarm Mode集群上部署一个Spring Cloud应用，可以看出Docker Swarm的优雅之处在于集群管理和Docker API一致以及优异的开发者体验。阿里云容器服务除了在共有云上提供了CaaS能力能力也会很快支持Swarm Mode，具体内容请移步。
+All in one is good, but you need to consider below factors when you want to run all the services in an production environment.
+
+- deploy Eureka server and applications separately, as Eureka server as an infrasturcture level service will not be updated frequently, it is not proper to deploy it with applications every time the application changes.
+- again, Eureka server as infrastructure level need some kind of HA (high availablity).
+
+
+
+Let's break the deployment into two compose files. Using [eureka.yml](compose/eureka.yml) you can deply a three-node-cluster of Euerka. All instances have same network alias ```eureka``` for which Eureka client will looking for.  
+
+[eureka.yml](compose/eureka.yml)
+
+```yaml
+version: '3'
+services:
+  eureka1:
+    image: binblee/demo-eurekaserver
+    networks:
+      springcloud-overlay:
+        aliases:
+          - eureka
+    ports:
+      - "8761:8761"
+    environment:
+      - ADDITIONAL_EUREKA_SERVER_LIST=http://eureka2:8761/eureka/,http://eureka3:8761/eureka/
+    ...
+  eureka2:
+    image: binblee/demo-eurekaserver
+    networks:
+      springcloud-overlay:
+        aliases:
+          - eureka
+    ports:
+      - "8762:8761"
+    environment:
+      - ADDITIONAL_EUREKA_SERVER_LIST=http://eureka1:8761/eureka/,http://eureka3:8761/eureka/
+    ...
+  eureka3:
+    image: binblee/demo-eurekaserver
+    networks:
+      springcloud-overlay:
+        aliases:
+          - eureka
+    ports:
+      - "8763:8761"
+    environment:
+      - ADDITIONAL_EUREKA_SERVER_LIST=http://eureka1:8761/eureka/,http://eureka3:8761/eureka/
+    ...
+networks:
+  springcloud-overlay:
+    external:
+      name: springcloud-overlay
+```
+
+
+
+[demoweb.yml](compose/demoweb.yml) gets the content from original [all-in-one.yml](compose/all-in-one.yml), adding network properties. All services will connect to ```springcloud-overlay``` network.
+
+```yaml
+version: '3'
+services:
+  web:
+    image: binblee/demo-web
+    networks:
+      - springcloud-overlay
+    environment:
+      - EUREKA_SERVER_ADDRESS=eureka
+    ports:
+      - "8080"
+    ...
+
+  bookservice:
+    image: binblee/demo-bookservice
+    networks:
+      - springcloud-overlay
+    environment:
+      - EUREKA_SERVER_ADDRESS=eureka
+    ...
+
+networks:
+  springcloud-overlay:
+    external:
+      name: springcloud-overlay
+```
+
+
+
+Let's deploy it, noted that ```springcloud-overlay``` network needs to be created before ```eureka``` and ```demoweb``` are deployed.
+
+```bash
+docker network create -d overlay springcloud-overlay
+cd compose/
+docker stack deploy -c eureka.yml
+docker stack deploy -c demoweb.yml
+```
+
+
+
+Access port 8761 of any node in swarm, you will see Eureka instance #1 has two replicas, and services are registered to it. Visit port 8761 and 8763, you will get other two Eureka server, have a try.
+
+![](images/eureka-cluster.png)
+
+## Recap
+
