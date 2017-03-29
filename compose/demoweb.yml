@@ -1,0 +1,26 @@
+version: '3'
+services:
+  web:
+    image: binblee/demo-web
+    networks:
+      - springcloud-overlay
+    environment:
+      - EUREKA_SERVER_ADDRESS=eureka
+    ports:
+      - "8080"
+    labels:
+      - "aliyun.logs.web=stdout"
+
+  bookservice:
+    image: binblee/demo-bookservice
+    networks:
+      - springcloud-overlay
+    environment:
+      - EUREKA_SERVER_ADDRESS=eureka
+    labels:
+      - "aliyun.logs.bookservice=stdout"
+
+networks:
+  springcloud-overlay:
+    external:
+      name: springcloud-overlay

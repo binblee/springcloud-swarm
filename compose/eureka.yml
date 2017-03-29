@@ -1,0 +1,42 @@
+version: '3'
+services:
+  eureka1:
+    image: binblee/demo-eurekaserver
+    networks:
+      springcloud-overlay:
+        aliases:
+          - eureka
+    ports:
+      - "8761:8761"
+    environment:
+      - ADDITIONAL_EUREKA_SERVER_LIST=http://eureka2:8761/eureka/,http://eureka3:8761/eureka/
+    labels:
+      - "aliyun.logs.eureka=stdout"
+  eureka2:
+    image: binblee/demo-eurekaserver
+    networks:
+      springcloud-overlay:
+        aliases:
+          - eureka
+    ports:
+      - "8762:8761"
+    environment:
+      - ADDITIONAL_EUREKA_SERVER_LIST=http://eureka1:8761/eureka/,http://eureka3:8761/eureka/
+    labels:
+      - "aliyun.logs.eureka=stdout"
+  eureka3:
+    image: binblee/demo-eurekaserver
+    networks:
+      springcloud-overlay:
+        aliases:
+          - eureka
+    ports:
+      - "8763:8761"
+    environment:
+      - ADDITIONAL_EUREKA_SERVER_LIST=http://eureka1:8761/eureka/,http://eureka3:8761/eureka/
+    labels:
+      - "aliyun.logs.eureka=stdout"
+networks:
+  springcloud-overlay:
+    external:
+      name: springcloud-overlay
