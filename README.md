@@ -215,7 +215,7 @@ docker stack deploy -c demoweb.yml
 
 
 
-Access port 8761 of any node in swarm, you will see Eureka instance #1 has two replicas, and services are registered to it. Visit port 8761 and 8763, you will get other two Eureka server, have a try.
+Access port 8761 of any node in swarm, you will see Eureka instance #1 has two replicas, and services are registered to it. Visit port 8762 and 8763, you will get other two Eureka server, have a try.
 
 ![](images/eureka-cluster.png)
 
