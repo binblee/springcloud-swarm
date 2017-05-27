@@ -10,7 +10,7 @@ services:
   web:
     image: binblee/demo-web
     environment:
-      - EUREKA_SERVER_ADDRESS=eureka
+      - EUREKA_SERVER_ADDRESS=http://eureka:8761/eureka
     ports:
       - "8080"
     labels:
@@ -19,6 +19,6 @@ services:
   bookservice:
     image: binblee/demo-bookservice
     environment:
-      - EUREKA_SERVER_ADDRESS=eureka
+      - EUREKA_SERVER_ADDRESS=http://eureka:8761/eureka
     labels:
       - "aliyun.logs.bookservice=stdout"
