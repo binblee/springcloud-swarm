@@ -8,8 +8,6 @@ services:
       - EUREKA_SERVER_ADDRESS=http://eureka1:8761/eureka/,http://eureka2:8761/eureka/,http://eureka3:8761/eureka/
     ports:
       - "8080"
-    labels:
-      - "aliyun.logs.web=stdout"
 
   bookservice:
     image: binblee/demo-bookservice
@@ -17,8 +15,6 @@ services:
       - springcloud-overlay
     environment:
       - EUREKA_SERVER_ADDRESS=http://eureka1:8761/eureka/,http://eureka2:8761/eureka/,http://eureka3:8761/eureka/
-    labels:
-      - "aliyun.logs.bookservice=stdout"
 
 networks:
   springcloud-overlay:

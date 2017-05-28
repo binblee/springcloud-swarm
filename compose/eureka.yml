@@ -22,8 +22,7 @@ services:
       - "8762:8761"
     environment:
       - ADDITIONAL_EUREKA_SERVER_LIST=http://eureka1:8761/eureka/,http://eureka3:8761/eureka/
-    labels:
-      - "aliyun.logs.eureka=stdout"
+
   eureka3:
     image: binblee/demo-eurekaserver
     networks:
@@ -34,8 +33,7 @@ services:
       - "8763:8761"
     environment:
       - ADDITIONAL_EUREKA_SERVER_LIST=http://eureka1:8761/eureka/,http://eureka2:8761/eureka/
-    labels:
-      - "aliyun.logs.eureka=stdout"
+
 networks:
   springcloud-overlay:
     external:
