@@ -33,7 +33,7 @@ services:
     ports:
       - "8763:8761"
     environment:
-      - ADDITIONAL_EUREKA_SERVER_LIST=http://eureka1:8761/eureka/,http://eureka3:8761/eureka/
+      - ADDITIONAL_EUREKA_SERVER_LIST=http://eureka1:8761/eureka/,http://eureka2:8761/eureka/
     labels:
       - "aliyun.logs.eureka=stdout"
 networks:
