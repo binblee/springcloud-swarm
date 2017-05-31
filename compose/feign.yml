@@ -1,0 +1,18 @@
+version: '3'
+services:
+  eureka:
+    image: binblee/demo-eurekaserver
+    ports:
+      - "8761"
+
+  web:
+    image: binblee/demo-webfeign
+    environment:
+      - EUREKA_SERVER_ADDRESS=http://eureka:8761/eureka
+    ports:
+      - "8080"
+      
+  bookservice:
+    image: binblee/demo-bookservice
+    environment:
+      - EUREKA_SERVER_ADDRESS=http://eureka:8761/eureka

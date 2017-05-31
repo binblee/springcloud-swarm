@@ -29,3 +29,9 @@ cd web
 progress "Building web image ..."
 docker tag $(docker build -t ${REGPREFIX}/demo-web -q .) ${REGPREFIX}/demo-web:$(date -ju "+%Y%m%d-%H%M%S")
 cd -
+
+cd webfeign
+./gradlew build
+progress "Building webfeign image ..."
+docker tag $(docker build -t ${REGPREFIX}/demo-webfeign -q .) ${REGPREFIX}/demo-webfeign:$(date -ju "+%Y%m%d-%H%M%S")
+cd -
