@@ -4,7 +4,7 @@
 
 # Spring Cloud application
 
-Demo application is a tiny Spring Cloud application which has three services. ```Web``` and ```BookService```will register itself to ```Eureka``` Service during boot. ```Web``` service depends on ```BookService```, when it is invoked, it will find available instances of ```BookService``` from ```Eureka``` Server. ```Web``` will call ```BookService``` REST API to fulfill its result. 
+Demo application is a tiny Spring Cloud application which has three services. ```Web``` and ```BookService```will register itself to ```Eureka``` Service during boot. ```Web``` service depends on ```BookService```, when it is invoked, it will find available instances of ```BookService``` from ```Eureka``` Server. ```Web``` will call ```BookService``` REST API to fulfill its result.
 
 
 
@@ -28,7 +28,7 @@ Run this command to build all images, it will rebuild all images even if no code
 
 
 
-Run demo application in local environment is wasy, there is an all-in-one compose file which allows you to run all the services. 
+Run demo application in local environment is wasy, there is an all-in-one compose file which allows you to run all the services.
 
 ```
 cd compose
@@ -58,7 +58,7 @@ You will see eureka maps to port 8761 of localhost while web maps to 32771 in th
 
 
 
-Access Eureka server through port 8761. You will see this Eureka server has one replica and two services registered. 
+Access Eureka server through port 8761. You will see this Eureka server has one replica and two services registered.
 
 ```
 http://localhost:8761
@@ -80,7 +80,7 @@ curl http://localhost:<port>
 
 ## Deploy to docker swarm using compose V3 template
 
-Let's take a look at [compose/all-in-one.yml](compose/all-in-one.yml). There are no version 3 specific compose syntax, you can deploy the application by using docker-compose in local environment, or deploy it to a Docker swarm cluster directly. 
+Let's take a look at [compose/all-in-one.yml](compose/all-in-one.yml). There are no version 3 specific compose syntax, you can deploy the application by using docker-compose in local environment, or deploy it to a Docker swarm cluster directly.
 
 ```yaml
 version: '3'
@@ -125,7 +125,7 @@ All in one is good, but you need to consider below factors when you want to run 
 
 
 
-Let's break the deployment into two compose files. Using [eureka.yml](compose/eureka.yml) you can deply a three-node-cluster of Euerka. All instances have same network alias ```eureka``` for which Eureka client will looking for.  
+Let's break the deployment into two compose files. Using [eureka.yml](compose/eureka.yml) you can deply a three-node-cluster of Euerka. All instances have same network alias ```eureka``` for which Eureka client will looking for.
 
 [eureka.yml](compose/eureka.yml)
 
@@ -163,7 +163,7 @@ services:
     ports:
       - "8763:8761"
     environment:
-      - ADDITIONAL_EUREKA_SERVER_LIST=http://eureka1:8761/eureka/,http://eureka3:8761/eureka/
+      - ADDITIONAL_EUREKA_SERVER_LIST=http://eureka1:8761/eureka/,http://eureka2:8761/eureka/
     ...
 networks:
   springcloud-overlay:
